@@ -55,7 +55,7 @@ export interface YourConfig {
 }
 ```
 
-Then you can use your configs with public property `config` of `ConsuleService`.
+Then you can use your configs with public property `configs` of `ConsuleService`.
 
 ```javascript
 import { ConsuleService } from 'nestjs-consul';
@@ -65,7 +65,7 @@ constructor(
 ) {}
 
 myMethod() {
-    const configs = this.consul.config;
+    const configs = this.consul.configs;
 }
 
 ```
