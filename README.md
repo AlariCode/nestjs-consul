@@ -37,6 +37,36 @@ import { ConsulModule } from 'nestjs-consul';
 })
 export class AppModule {}
 ```
+
+If you want to inject dependency into `forRoot` method like Configuration service, use `forRootAsync`:
+
+```javascript
+import { ConsulModule } from 'nestjs-consul';
+
+@Module({
+	imports: [
+		// ...
+        ConfigModule,
+        ConsulModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: async (configService: ConfigService) => {
+                return {
+                    keys: [{ key: 'am-cli/test' }],
+                    connection: {
+                        protocol: 'http',
+                        port: configService.getIP(),
+                        host: '192.168.0.1',
+                        token: 'admin',
+                    },
+                };
+            },
+        }),
+	],
+})
+export class AppModule {}
+```
+
 - **keys** (IConsulKeys[]?) - array of keys and required status from which you want to load values. If key was not found and it was required, app with throw an exception. If it was not required - you will see warning. If no keys specified, no initial configs will be loaded.  
 - **updateCron** (string) - cron string. If specified, will update configs on cron.
 - **protocol** ('http' | 'https') - consul protocol.

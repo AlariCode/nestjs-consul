@@ -4,7 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { ApiController } from '../mocks/api.controller';
 import { ConfigInterface } from '../mocks/config.interface';
 
-describe('Consule2e', () => {
+describe('ConsulE2e', () => {
 	let api: INestApplication;
 	let apiController: ApiController;
 	let consulService: ConsulService<ConfigInterface>;

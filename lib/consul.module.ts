@@ -1,6 +1,6 @@
 import { Module, DynamicModule, Provider, Global, HttpService } from '@nestjs/common';
 import { ConsulService } from './consul.service';
-import { IConsulConfig } from './interfaces/consul-config.interface';
+import { IConsulConfig, IConsulAsyncConfig } from './interfaces/consul-config.interface';
 
 @Global()
 @Module({})
@@ -10,7 +10,7 @@ export class ConsulModule {
 			provide: ConsulService,
 			useFactory: async () => {
 				const consulService = new ConsulService<T>(config, new HttpService());
-				if(config.keys) {
+				if (config.keys) {
 					await consulService.update();
 				}
 				return consulService;
@@ -20,6 +20,33 @@ export class ConsulModule {
 			module: ConsulModule,
 			providers: [consulServiceProvider],
 			exports: [consulServiceProvider],
+		};
+	}
+
+	static forRootAsync<T>(options: IConsulAsyncConfig): DynamicModule {
+		const consulServiceProvider = this.createAsyncOptionsProvider<T>(options);
+		return {
+			module: ConsulModule,
+			imports: options.imports,
+			providers: [consulServiceProvider],
+			exports:[consulServiceProvider]
+		};
+	}
+
+	private static createAsyncOptionsProvider<T>(
+		options: IConsulAsyncConfig,
+	): Provider {
+		return {
+			provide: ConsulService,
+			useFactory: async (...args: any[]) => {
+				const config = await options.useFactory(...args);
+				const consulService = new ConsulService<T>(config, new HttpService());
+				if (config.keys) {
+					await consulService.update();
+				}
+				return consulService;
+			},
+			inject: options.inject || [],
 		};
 	}
 }
