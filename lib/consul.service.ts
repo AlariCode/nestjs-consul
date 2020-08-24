@@ -17,25 +17,45 @@ export class ConsulService<T> {
 		this.planUpdate(updateCron);
 	}
 
+	private async getKeyFromConsul(k: IConsulKeys) {
+		try {
+			const { data } = await this.httpService
+				.get<IConsulResponse[]>(`${this.consulURL}${k.key}`, {
+					headers: {
+						'X-Consul-Token': this.token,
+					},
+				}).toPromise();
+			return data;
+		} catch (e) {
+			if (k.required) {
+				throw new Error(`Не найден ключ ${k.key}`)
+			}
+			Logger.warn(`Не найден ключ ${k.key}`);
+			return null;
+		}
+	}
+
+	private updateConfig(value: any, key: IConsulKeys) {
+		try {
+			const result = value !== null ? Buffer.from(value, 'base64').toString() : value;
+			this.configs[key.key] = JSON.parse(result);
+		} catch (e) {
+			const msg = `Invalid JSON value in ${key.key}`;
+			if (key.required) {
+				throw new Error(msg);
+			}
+			Logger.warn(msg);
+		}
+	}
+
 	public async update(): Promise<void> {
 		if(!this.keys) {
 			return;
 		}
 		for (const k of this.keys) {
-			try {
-				const { data } = await this.httpService
-					.get<IConsulResponse[]>(`${this.consulURL}${k.key}`, {
-						headers: {
-							'X-Consul-Token': this.token,
-						},
-					}).toPromise();
-				const result = Buffer.from(data[0].Value, 'base64').toString();
-				this.configs[k.key] = JSON.parse(result);
-			} catch (e) {
-				if (k.required) {
-					throw new Error(`Не найден ключ ${k.key}`)
-				}
-				Logger.warn(`Не найден ключ ${k.key}`);
+			const data = await this.getKeyFromConsul(k);
+			if (data) {
+				this.updateConfig(data[0].Value, k)
 			}
 		}
 	}
