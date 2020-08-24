@@ -2,7 +2,6 @@ import { IConsulConfig, IConsulKeys } from './interfaces/consul-config.interface
 import { HttpService, Logger } from '@nestjs/common';
 import { IConsulResponse } from './interfaces/consul-response.interface';
 import { schedule } from 'node-cron';
-import { type } from 'os';
 
 export class ConsulService<T> {
 	public configs: T = Object.create({});
