@@ -7,10 +7,10 @@ import { type } from 'os';
 export class ConsulService<T> {
 	public configs: T = Object.create({});
 	private readonly consulURL: string;
-	private readonly keys: IConsulKeys[] | undefined;
+	private readonly keys: IConsulKeys<T>[] | undefined;
 	private readonly token: string;
 
-	constructor({ connection, keys, updateCron }: IConsulConfig, private readonly httpService: HttpService) {
+	constructor({ connection, keys, updateCron }: IConsulConfig<T>, private readonly httpService: HttpService) {
 		this.consulURL = `${connection.protocol}://${connection.host}:${connection.port}/v1/kv/`;
 		this.keys = keys;
 		this.token = connection.token;

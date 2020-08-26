@@ -5,7 +5,7 @@ import { IConsulConfig, IConsulAsyncConfig } from './interfaces/consul-config.in
 @Global()
 @Module({})
 export class ConsulModule {
-	static forRoot<T>(config: IConsulConfig): DynamicModule {
+	static forRoot<T>(config: IConsulConfig<T>): DynamicModule {
 		const consulServiceProvider: Provider = {
 			provide: ConsulService,
 			useFactory: async () => {
@@ -23,7 +23,7 @@ export class ConsulModule {
 		};
 	}
 
-	static forRootAsync<T>(options: IConsulAsyncConfig): DynamicModule {
+	static forRootAsync<T>(options: IConsulAsyncConfig<T>): DynamicModule {
 		const consulServiceProvider = this.createAsyncOptionsProvider<T>(options);
 		return {
 			module: ConsulModule,
@@ -34,7 +34,7 @@ export class ConsulModule {
 	}
 
 	private static createAsyncOptionsProvider<T>(
-		options: IConsulAsyncConfig,
+		options: IConsulAsyncConfig<T>,
 	): Provider {
 		return {
 			provide: ConsulService,
