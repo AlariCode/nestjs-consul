@@ -19,7 +19,7 @@ export class ConsulService<T> {
 	private async getKeyFromConsul(k: IConsulKeys) {
 		try {
 			const { data } = await this.httpService
-				.get<IConsulResponse[]>(`${this.consulURL}${k.key}`, {
+				.get<IConsulResponse[]>(`${this.consulURL}${String(k.key)}`, {
 					headers: {
 						'X-Consul-Token': this.token,
 					},
@@ -27,9 +27,9 @@ export class ConsulService<T> {
 			return data;
 		} catch (e) {
 			if (k.required) {
-				throw new Error(`Не найден ключ ${k.key}`)
+				throw new Error(`Не найден ключ ${String(k.key)}`)
 			}
-			Logger.warn(`Не найден ключ ${k.key}`);
+			Logger.warn(`Не найден ключ ${String(k.key)}`);
 			return null;
 		}
 	}
@@ -39,7 +39,7 @@ export class ConsulService<T> {
 			const result = value !== null ? Buffer.from(value, 'base64').toString() : value;
 			this.configs[key.key] = JSON.parse(result);
 		} catch (e) {
-			const msg = `Invalid JSON value in ${key.key}`;
+			const msg = `Invalid JSON value in ${String(key.key)}`;
 			if (key.required) {
 				throw new Error(msg);
 			}
