@@ -26,10 +26,11 @@ export class ConsulService<T> {
 				}).toPromise();
 			return data;
 		} catch (e) {
+                        const msg = `Cannot find key ${String(k.key)}`;
 			if (k.required) {
-				throw new Error(`Не найден ключ ${String(k.key)}`)
+				throw new Error(msg)
 			}
-			Logger.warn(`Не найден ключ ${String(k.key)}`);
+			Logger.warn(msg);
 			return null;
 		}
 	}
