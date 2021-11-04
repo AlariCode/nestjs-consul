@@ -41,6 +41,7 @@ export class ConsulService<T> {
 			this.configs[key.key] = JSON.parse(result);
 		} catch (e) {
 			const msg = `Invalid JSON value in ${String(key.key)}`;
+
 			if (key.required) {
 				throw new Error(msg);
 			}
