@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.1
+- Fixed error message translation (thx @leetwinski)
+
 ## 1.2.0
 - Added key type savety (thx @mak2xt)
 
