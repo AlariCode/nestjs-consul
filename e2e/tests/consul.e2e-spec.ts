@@ -17,8 +17,8 @@ describe('ConsulE2e', () => {
 					connection: {
 						protocol: 'http',
 						port: 8500,
-						host: '192.168.0.252',
-						token: 'admin',
+						host: '10.10.33.158',
+						token: '0EPNnRC75kOwyZZ21MVXSA==',
 					},
 				}),
 			],
