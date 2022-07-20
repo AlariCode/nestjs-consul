@@ -2,7 +2,8 @@
 
 ![alt cover](https://github.com/AlariCode/nestjs-consul/raw/master/img/logo.jpg)
 
-**More NestJS libs on [alariblog.ru](https://alariblog.ru)**
+**More NestJS libs on [alariblog.ru](https://purpleschool.ru)**
+**Updated for NestJS 9**
 
 [![npm version](https://badgen.net/npm/v/nestjs-consul)](https://www.npmjs.com/package/nestjs-dotenv)
 [![npm version](https://badgen.net/npm/license/nestjs-consul)](https://www.npmjs.com/package/nestjs-dotenv)
@@ -23,16 +24,18 @@ import { ConsulModule } from 'nestjs-consul';
 @Module({
 	imports: [
 		// ...
-		ConsulModule.forRoot<YourConfig>({
-            keys: [{ key: 'your/keypath' }],
-            updateCron: '* * * * *',
-            connection: {
-                protocol: 'http',
-                port: 8500,
-                host: '192.168.0.1',
-                token: 'mutoken',
-            },
-        }),
+		ConsulModule.forRoot <
+			YourConfig >
+			{
+				keys: [{ key: 'your/keypath' }],
+				updateCron: '* * * * *',
+				connection: {
+					protocol: 'http',
+					port: 8500,
+					host: '192.168.0.1',
+					token: 'mutoken',
+				},
+			},
 	],
 })
 export class AppModule {}
@@ -46,42 +49,42 @@ import { ConsulModule } from 'nestjs-consul';
 @Module({
 	imports: [
 		// ...
-        ConfigModule,
-        ConsulModule.forRootAsync({
-            imports: [ConfigModule],
-            inject: [ConfigService],
-            useFactory: async (configService: ConfigService) => {
-                return {
-                    keys: [{ key: 'am-cli/test' }],
-                    connection: {
-                        protocol: 'http',
-                        port: configService.getIP(),
-                        host: '192.168.0.1',
-                        token: 'admin',
-                    },
-                };
-            },
-        }),
+		ConfigModule,
+		ConsulModule.forRootAsync({
+			imports: [ConfigModule],
+			inject: [ConfigService],
+			useFactory: async (configService: ConfigService) => {
+				return {
+					keys: [{ key: 'am-cli/test' }],
+					connection: {
+						protocol: 'http',
+						port: configService.getIP(),
+						host: '192.168.0.1',
+						token: 'admin',
+					},
+				};
+			},
+		}),
 	],
 })
 export class AppModule {}
 ```
 
-- **keys** (IConsulKeys[]?) - array of keys and required status from which you want to load values. If key was not found and it was required, app with throw an exception. If it was not required - you will see warning. If no keys specified, no initial configs will be loaded.  
-- **updateCron** (string) - cron string. If specified, will update configs on cron.
-- **protocol** ('http' | 'https') - consul protocol.
-- **protocol** ('http' | 'https') - consul protocol.
-- **port** (number) - consul port.
-- **host** (string) - consul host.
-- **token** (string) - consul auth token.
-- **YourConfig** (interface) - interface, that describes you entire config. This will allow you to use type save configs. In this example it would be like:
+-   **keys** (IConsulKeys[]?) - array of keys and required status from which you want to load values. If key was not found and it was required, app with throw an exception. If it was not required - you will see warning. If no keys specified, no initial configs will be loaded.
+-   **updateCron** (string) - cron string. If specified, will update configs on cron.
+-   **protocol** ('http' | 'https') - consul protocol.
+-   **protocol** ('http' | 'https') - consul protocol.
+-   **port** (number) - consul port.
+-   **host** (string) - consul host.
+-   **token** (string) - consul auth token.
+-   **YourConfig** (interface) - interface, that describes you entire config. This will allow you to use type save configs. In this example it would be like:
 
 ```javascript
 export interface YourConfig {
-    'your/keypath': {
-        value1: number;
-        value2: string;
-    }
+	'your/keypath': {
+		value1: number,
+		value2: string,
+	};
 }
 ```
 
@@ -103,6 +106,7 @@ myMethod() {
 ## Additional methods
 
 ### update()
+
 Returns `Promise<void>`. Force updates your config.
 
 ```javascript
@@ -110,20 +114,23 @@ await this.consul.update();
 ```
 
 ### get<T>(key: string)
+
 Returns `Promise<T>`. Gets a value from consul with `key` and `T` type.
 
 ```javascript
-const value = await this.consul.get<MyInterface>('my/key');
+const value = (await this.consul.get) < MyInterface > 'my/key';
 ```
 
 ### set<T>(key: string, value: T)
+
 Returns `Promise<boolean>`. Sets a value to consul with `key` and `T` type. Returns `true` if succeeded.
 
 ```javascript
-const response = await this.consul.set<MyInterface>('my/key', value);
+const response = (await this.consul.set) < MyInterface > ('my/key', value);
 ```
 
 ### delete(key: string)
+
 Returns `Promise<boolean>`. Deletes a value from consul with `key`. Returns `true` if succeeded.
 
 ```javascript
@@ -131,10 +138,13 @@ const response = await this.consul.delete('my/key');
 ```
 
 ## Running tests
+
 To run e2e tests you need to have consul instance started and run test for the firs time (to add config key).
 
 Then run tests with.
+
 ```
 npm run test
 ```
+
 ![alt cover](https://github.com/AlariCode/nestjs-consul/raw/master/img/tests.png)

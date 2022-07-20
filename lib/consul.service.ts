@@ -1,7 +1,8 @@
 import { IConsulConfig, IConsulKeys } from './interfaces/consul-config.interface';
-import { HttpService, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { IConsulResponse } from './interfaces/consul-response.interface';
 import { schedule } from 'node-cron';
+import { HttpService } from '@nestjs/axios';
 
 export class ConsulService<T> {
 	public configs: T = Object.create({});
@@ -50,7 +51,7 @@ export class ConsulService<T> {
 	}
 
 	public async update(): Promise<void> {
-		if(!this.keys) {
+		if (!this.keys) {
 			return;
 		}
 		for (const k of this.keys) {

@@ -24,7 +24,7 @@ describe('ConsulE2eAsync', () => {
 							connection: {
 								protocol: 'http',
 								port: testService.getIP(),
-								host: '10.10.33.158',
+								host: 'localhost',
 								token: '0EPNnRC75kOwyZZ21MVXSA==',
 							},
 						};

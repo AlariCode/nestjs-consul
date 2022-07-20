@@ -1,4 +1,5 @@
-import { Module, DynamicModule, Provider, Global, HttpService } from '@nestjs/common';
+import { HttpModule, HttpService } from '@nestjs/axios';
+import { Module, DynamicModule, Provider, Global } from '@nestjs/common';
 import { ConsulService } from './consul.service';
 import { IConsulConfig, IConsulAsyncConfig } from './interfaces/consul-config.interface';
 
@@ -20,6 +21,7 @@ export class ConsulModule {
 			module: ConsulModule,
 			providers: [consulServiceProvider],
 			exports: [consulServiceProvider],
+			imports: [HttpModule]
 		};
 	}
 
@@ -29,7 +31,7 @@ export class ConsulModule {
 			module: ConsulModule,
 			imports: options.imports,
 			providers: [consulServiceProvider],
-			exports:[consulServiceProvider]
+			exports: [consulServiceProvider]
 		};
 	}
 
