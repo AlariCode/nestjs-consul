@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { IConsulResponse } from './interfaces/consul-response.interface';
 import { schedule } from 'node-cron';
 import { HttpService } from '@nestjs/axios';
+import { lastValueFrom } from 'rxjs';
 
 export class ConsulService<T> {
 	public configs: T = Object.create({});
@@ -19,17 +20,18 @@ export class ConsulService<T> {
 
 	private async getKeyFromConsul(k: IConsulKeys) {
 		try {
-			const { data } = await this.httpService
-				.get<IConsulResponse[]>(`${this.consulURL}${String(k.key)}`, {
+			const { data } = await lastValueFrom(
+				this.httpService.get<IConsulResponse[]>(`${this.consulURL}${String(k.key)}`, {
 					headers: {
 						'X-Consul-Token': this.token,
 					},
-				}).toPromise();
+				})
+			);
 			return data;
 		} catch (e) {
 			const msg = `Cannot find key ${String(k.key)}`;
 			if (k.required) {
-				throw new Error(msg)
+				throw new Error(msg);
 			}
 			Logger.warn(msg);
 			return null;
@@ -57,20 +59,20 @@ export class ConsulService<T> {
 		for (const k of this.keys) {
 			const data = await this.getKeyFromConsul(k);
 			if (data) {
-				this.updateConfig(data[0].Value, k)
+				this.updateConfig(data[0].Value, k);
 			}
 		}
 	}
 
 	public async set<T>(key: string, value: T): Promise<boolean> {
 		try {
-			const { data } = await this.httpService
-				.put<boolean>(`${this.consulURL}${key}`, value, {
+			const { data } = await lastValueFrom(
+				this.httpService.put<boolean>(`${this.consulURL}${key}`, value, {
 					headers: {
 						'X-Consul-Token': this.token,
 					},
 				})
-				.toPromise();
+			);
 			return data;
 		} catch (e) {
 			Logger.error(e);
@@ -79,13 +81,13 @@ export class ConsulService<T> {
 
 	public async get<T>(key: string): Promise<T> {
 		try {
-			const { data } = await this.httpService
-				.get<boolean>(`${this.consulURL}${key}`, {
+			const { data } = await lastValueFrom(
+				this.httpService.get<boolean>(`${this.consulURL}${key}`, {
 					headers: {
 						'X-Consul-Token': this.token,
 					},
 				})
-				.toPromise();
+			);
 			const result = Buffer.from(data[0].Value, 'base64').toString();
 			return JSON.parse(result);
 		} catch (e) {
@@ -95,13 +97,13 @@ export class ConsulService<T> {
 
 	public async delete(key: string): Promise<boolean> {
 		try {
-			const { data } = await this.httpService
-				.delete<boolean>(`${this.consulURL}${key}`, {
+			const { data } = await lastValueFrom(
+				this.httpService.delete<boolean>(`${this.consulURL}${key}`, {
 					headers: {
 						'X-Consul-Token': this.token,
 					},
 				})
-				.toPromise();
+			);
 			return data;
 		} catch (e) {
 			Logger.error(e);
@@ -111,7 +113,7 @@ export class ConsulService<T> {
 	private planUpdate(updateCron: string | undefined) {
 		if (updateCron) {
 			schedule(updateCron, async () => {
-				this.update()
+				this.update();
 			});
 		}
 	}
