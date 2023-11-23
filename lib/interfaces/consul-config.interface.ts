@@ -1,5 +1,5 @@
 import { IConsulConnection } from './consul-connection.interface';
-import { ModuleMetadata, Type } from '@nestjs/common';
+import { ModuleMetadata } from '@nestjs/common';
 
 export interface IConsulConfig<T = any> {
 	keys?: IConsulKeys<T>[];
@@ -8,8 +8,8 @@ export interface IConsulConfig<T = any> {
 }
 
 export interface IConsulAsyncConfig<T = any> extends Pick<ModuleMetadata, 'imports'> {
-		useFactory?: (...args: any[]) => Promise<IConsulConfig<T>> | IConsulConfig<T>;
-		inject?: any[];
+	useFactory?: (...args: any[]) => Promise<IConsulConfig<T>> | IConsulConfig<T>;
+	inject?: any[];
 }
 
 export interface IConsulKeys<T = any> {

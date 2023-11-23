@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { IConsulResponse } from './interfaces/consul-response.interface';
 import { schedule } from 'node-cron';
 import { HttpService } from '@nestjs/axios';
+import { catchError, lastValueFrom, map, of } from 'rxjs';
 
 export class ConsulService<T> {
 	public configs: T = Object.create({});
@@ -17,23 +18,25 @@ export class ConsulService<T> {
 		this.planUpdate(updateCron);
 	}
 
-	private async getKeyFromConsul(k: IConsulKeys) {
-		try {
-			const { data } = await this.httpService
-				.get<IConsulResponse[]>(`${this.consulURL}${String(k.key)}`, {
-					headers: {
-						'X-Consul-Token': this.token,
-					},
-				}).toPromise();
-			return data;
-		} catch (e) {
-			const msg = `Cannot find key ${String(k.key)}`;
-			if (k.required) {
-				throw new Error(msg)
-			}
-			Logger.warn(msg);
-			return null;
-		}
+	private async getKeyFromConsul(k: IConsulKeys): Promise<IConsulResponse[] | null> {
+		const observable = this.httpService
+			.get<IConsulResponse[]>(`${this.consulURL}${String(k.key)}`, {
+				headers: {
+					'X-Consul-Token': this.token,
+				},
+			})
+			.pipe(
+				map((response) => response.data),
+				catchError(() => {
+					const msg = `Cannot find key ${String(k.key)}`;
+					if (k.required) {
+						throw new Error(msg);
+					}
+					Logger.warn(msg);
+					return of(null);
+				})
+			);
+		return await lastValueFrom(observable);
 	}
 
 	private updateConfig(value: any, key: IConsulKeys) {
@@ -57,61 +60,67 @@ export class ConsulService<T> {
 		for (const k of this.keys) {
 			const data = await this.getKeyFromConsul(k);
 			if (data) {
-				this.updateConfig(data[0].Value, k)
+				this.updateConfig(data[0].Value, k);
 			}
 		}
 	}
 
 	public async set<T>(key: string, value: T): Promise<boolean> {
-		try {
-			const { data } = await this.httpService
-				.put<boolean>(`${this.consulURL}${key}`, value, {
-					headers: {
-						'X-Consul-Token': this.token,
-					},
+		const observable = this.httpService
+			.put<boolean>(`${this.consulURL}${key}`, value, {
+				headers: {
+					'X-Consul-Token': this.token,
+				},
+			})
+			.pipe(
+				map((response) => response.data),
+				catchError((e) => {
+					Logger.error(e);
+					return of(false);
 				})
-				.toPromise();
-			return data;
-		} catch (e) {
-			Logger.error(e);
-		}
+			);
+		return await lastValueFrom(observable);
 	}
 
 	public async get<T>(key: string): Promise<T> {
-		try {
-			const { data } = await this.httpService
-				.get<boolean>(`${this.consulURL}${key}`, {
-					headers: {
-						'X-Consul-Token': this.token,
-					},
+		const observable = this.httpService
+			.get<boolean>(`${this.consulURL}${key}`, {
+				headers: {
+					'X-Consul-Token': this.token,
+				},
+			})
+			.pipe(
+				map(({ data }) => Buffer.from(data[0].Value, 'base64').toString()),
+				map((result) => JSON.parse(result) as T),
+				catchError(() => {
+					return of({} as T);
 				})
-				.toPromise();
-			const result = Buffer.from(data[0].Value, 'base64').toString();
-			return JSON.parse(result);
-		} catch (e) {
-			Logger.error(e);
-		}
+			);
+
+		return await lastValueFrom(observable);
 	}
 
 	public async delete(key: string): Promise<boolean> {
-		try {
-			const { data } = await this.httpService
-				.delete<boolean>(`${this.consulURL}${key}`, {
-					headers: {
-						'X-Consul-Token': this.token,
-					},
+		const observable = this.httpService
+			.delete<boolean>(`${this.consulURL}${key}`, {
+				headers: {
+					'X-Consul-Token': this.token,
+				},
+			})
+			.pipe(
+				map((response) => response.data),
+				catchError((e) => {
+					Logger.error(e);
+					return of(false);
 				})
-				.toPromise();
-			return data;
-		} catch (e) {
-			Logger.error(e);
-		}
+			);
+		return await lastValueFrom(observable);
 	}
 
 	private planUpdate(updateCron: string | undefined) {
 		if (updateCron) {
 			schedule(updateCron, async () => {
-				this.update()
+				this.update();
 			});
 		}
 	}
