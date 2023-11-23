@@ -41,9 +41,10 @@
 		"typescript": "^5.3.2"
 	},
 	"peerDependencies": {
-		"@nestjs/common": ">=10",
-		"@nestjs/platform-fastify": ">=10",
-		"@nestjs/platform-express": ">=10"
+		"@nestjs/common": ">=8",
+		"@nestjs/platform-fastify": ">=8",
+		"@nestjs/platform-express": ">=8",
+		"rxjs": ">=7"
 	},
 	"dependencies": {
 		"@nestjs/axios": "^3.0.1",
